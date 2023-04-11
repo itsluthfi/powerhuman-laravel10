@@ -15,7 +15,6 @@ class Company extends Model
         'logo'
     ];
 
-
     public function users()
     {
         return $this->belongsToMany(User::class);
