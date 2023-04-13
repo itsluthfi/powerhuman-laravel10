@@ -40,4 +40,54 @@ class UserController extends Controller
             return ResponseFormatter::error($e->getMessage());
         }
     }
+
+    public function register(Request $request)
+    {
+        try {
+            // Validate request
+            $request->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+                'password' => ['required', 'string', new Password],
+            ]);
+
+            // Create user
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+            ]);
+
+            // Generate token
+            $tokenResult = $user->createToken('authToken')->plainTextToken;
+
+            // Return response
+            return ResponseFormatter::success([
+                'access_token' => $tokenResult,
+                'token_type' => 'Bearer',
+                'user' => $user
+            ], 'Register success');
+        } catch (Exception $error) {
+            // Return error response
+            return ResponseFormatter::error($error->getMessage());
+        }
+    }
+
+    public function logout(Request $request)
+    {
+        // Revoke Token
+        $token = $request->user()->currentAccessToken()->delete();
+
+        // Return response
+        return ResponseFormatter::success($token, 'Logout success');
+    }
+
+    public function fetch(Request $request)
+    {
+        // Get user
+        $user = $request->user();
+
+        // Return response
+        return ResponseFormatter::success($user, 'Fetch success');
+    }
 }
