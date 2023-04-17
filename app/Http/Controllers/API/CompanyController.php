@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers\API;
 
+use Exception;
+use App\Models\User;
 use App\Models\Company;
 use Illuminate\Http\Request;
 use App\Helpers\ResponseFormatter;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\CreateCompanyRequest;
-use App\Models\User;
-use Exception;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\CreateCompanyRequest;
+use App\Http\Requests\UpdateCompanyRequest;
 
 class CompanyController extends Controller
 {
@@ -73,6 +74,34 @@ class CompanyController extends Controller
             $company->load('users');
 
             return ResponseFormatter::success($company, 'Company created');
+        } catch (Exception $e) {
+            return ResponseFormatter::error($e->getMessage(), 500);
+        }
+    }
+
+    public function update(UpdateCompanyRequest $request, $id)
+    {
+        try {
+            // Get company
+            $company = Company::find($id);
+
+            // Check if company exists
+            if (!$company) {
+                throw new Exception('Company not found');
+            }
+
+            // Upload logo
+            if ($request->hasFile('logo')) {
+                $path = $request->file('logo')->store('public/logos');
+            }
+
+            // Update company
+            $company->update([
+                'name' => $request->name,
+                'logo' => $path
+            ]);
+
+            return ResponseFormatter::success($company, 'Company updated');
         } catch (Exception $e) {
             return ResponseFormatter::error($e->getMessage(), 500);
         }
