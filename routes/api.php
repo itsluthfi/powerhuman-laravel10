@@ -33,3 +33,11 @@ Route::prefix('company')->middleware('auth:sanctum')->name('company.')->group(fu
     Route::post('', [CompanyController::class, 'create'])->name('create');
     Route::post('update/{id}', [CompanyController::class, 'update'])->name('update');
 });
+
+// Team API
+Route::prefix('team')->middleware('auth:sanctum')->name('team.')->group(function () {
+    Route::get('', [TeamController::class, 'fetch'])->name('fetch');
+    Route::post('', [TeamController::class, 'create'])->name('create');
+    Route::post('update/{id}', [TeamController::class, 'update'])->name('update');
+    Route::delete('{id}', [TeamController::class, 'destroy'])->name('delete');
+});
